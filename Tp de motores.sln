@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tp de motores", "Tp de motores.csproj", "{51DBA23E-DFE9-BA6E-571B-957CE9CE8B0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tp de motores.Editor", "Tp de motores.Editor.csproj", "{37A87303-E977-CE3E-310F-F0C9DB446979}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{51DBA23E-DFE9-BA6E-571B-957CE9CE8B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51DBA23E-DFE9-BA6E-571B-957CE9CE8B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51DBA23E-DFE9-BA6E-571B-957CE9CE8B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51DBA23E-DFE9-BA6E-571B-957CE9CE8B0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37A87303-E977-CE3E-310F-F0C9DB446979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37A87303-E977-CE3E-310F-F0C9DB446979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37A87303-E977-CE3E-310F-F0C9DB446979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37A87303-E977-CE3E-310F-F0C9DB446979}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
