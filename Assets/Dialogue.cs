@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Dialogue : ScriptableObject {
 
-    public string text;
+    public string dialogueText;
+   // public bool isAnswer;
+   // public bool finishesConversation;
+    public int numerOfPosibleAnswers;
+    public Answer[] answers;
 
 }
