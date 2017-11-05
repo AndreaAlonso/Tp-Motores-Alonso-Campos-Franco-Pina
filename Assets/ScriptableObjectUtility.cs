@@ -5,11 +5,11 @@ using System.IO;
 
 public class ScriptableObjectUtility : MonoBehaviour {
 
-    public static void CreateAsset<T>() where T : ScriptableObject
+    public static T CreateAsset<T>() where T : ScriptableObject
     {
         T asset = ScriptableObject.CreateInstance<T>();
 
-        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/" + typeof(T).ToString() + ".asset");
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/NewObjects/" + typeof(T).ToString() + ".asset");
 
         AssetDatabase.CreateAsset(asset, assetPathAndName);
 
@@ -20,5 +20,7 @@ public class ScriptableObjectUtility : MonoBehaviour {
         EditorUtility.FocusProjectWindow();
 
         Selection.activeObject = asset;
+
+        return asset;
     }
 }

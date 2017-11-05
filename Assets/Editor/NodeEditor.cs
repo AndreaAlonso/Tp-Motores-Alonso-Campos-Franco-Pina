@@ -16,14 +16,20 @@ public class NodeEditor : EditorWindow {
     private Vector2 offset;
     private Vector2 drag;
 
+    
+
     [MenuItem("Personalizado/Node Editor")]
     static void ShowEditor()
     {
         NodeEditor editor = EditorWindow.GetWindow<NodeEditor>();
     }
-
-     void OnGUI()
+    
+    void OnGUI()
     {
+        if (GUILayout.Button("Generate Conversation"))
+        {
+            SaveConversation();
+        }
         Event e = Event.current;
 
         DrawGrid(20, 0.2f, Color.black);
@@ -51,15 +57,15 @@ public class NodeEditor : EditorWindow {
                 if (!clickedOnWindow)
                 {
                     GenericMenu menu = new GenericMenu();
-
-                    //menu.AddItem(new GUIContent("Add Input Node"), false, ContextCallBack, "inputNode");
-                    //menu.AddItem(new GUIContent("Add Output Node"), false, ContextCallBack, "outputNode");
-                    //menu.AddItem(new GUIContent("Add Calculation Node"), false, ContextCallBack, "calcNode");
-                    //menu.AddItem(new GUIContent("Add Comparison Node"), false, ContextCallBack, "compNode");
-
+                    /*
+                    menu.AddItem(new GUIContent("Add Input Node"), false, ContextCallBack, "inputNode");
+                    menu.AddItem(new GUIContent("Add Output Node"), false, ContextCallBack, "outputNode");
+                    menu.AddItem(new GUIContent("Add Calculation Node"), false, ContextCallBack, "calcNode");
+                    menu.AddItem(new GUIContent("Add Comparison Node"), false, ContextCallBack, "compNode");
+                    */
                     menu.AddItem(new GUIContent("Add Start Node"), false, ContextCallBack, "startNode");
                     menu.AddItem(new GUIContent("Add Dialogue Node"), false, ContextCallBack, "dialogueNode");
-                    menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
+                   // menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
                     menu.AddItem(new GUIContent("Add Event Node"), false, ContextCallBack, "eventNode");
                     menu.AddItem(new GUIContent("Add DiceRoll Node"), false, ContextCallBack, "diceRollNode");
                     menu.AddItem(new GUIContent("Add End Node"), false, ContextCallBack, "endNode");
@@ -140,7 +146,7 @@ public class NodeEditor : EditorWindow {
         {
             Rect mouseRect = new Rect(e.mousePosition.x, e.mousePosition.y, 10, 10);
 
-            DrawNodeCurve(selectedNode.windowRect, mouseRect);
+            DrawNodeCurve(selectedNode.windowRect, mouseRect, Color.black);
             Repaint();
         }
         foreach (BaseNode n in windows)
@@ -156,6 +162,80 @@ public class NodeEditor : EditorWindow {
         }
         EndWindows();
     }
+
+
+    private void SaveConversation()
+    {
+        BaseScriptableObject lastNode = null;
+
+        for (int i = 0; i < windows.Count; i++)
+
+        {
+            if (windows[i] is StartNode)
+            {
+                StartNode nodeNew = (StartNode)windows[i];
+                BaseScriptableObject start = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
+                start.name = "Start";
+                lastNode = start;
+
+            }
+            if (windows[i] is DialogueNode)
+            {
+                DialogueNode nodeNew = (DialogueNode)windows[i];
+                BaseScriptableObject npcDialogue = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
+                npcDialogue.dialogue = nodeNew.text;
+                if (lastNode != null)
+                    lastNode.next = npcDialogue;
+                lastNode = npcDialogue;
+
+            }
+            if (windows[i] is EventNode)
+            {
+                EventNode nodeNew = (EventNode)windows[i];
+                EventDialogue npcDialogue = ScriptableObjectUtility.CreateAsset<EventDialogue>();
+                npcDialogue.dialogue = nodeNew.text;
+                npcDialogue.rewardToRecieve = nodeNew.reward;
+                if (nodeNew.healthPoints != 0)
+                    npcDialogue.goldOrHp = nodeNew.healthPoints;
+                else if (nodeNew.gold != 0)
+                    npcDialogue.goldOrHp = nodeNew.gold;
+                else npcDialogue.item = nodeNew.itemId;
+
+                if (lastNode != null)
+                    lastNode.next = npcDialogue;
+                lastNode = npcDialogue;
+
+            }
+            if (windows[i] is EndNode)
+            {
+                EndNode endNode = (EndNode)windows[i];
+                BaseScriptableObject end = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
+                end.name = "End";
+                end.dialogue = "Finished";
+                lastNode.next = end;
+                //lastNode = end;
+            }
+            if (windows[i] is DiceRollNode)
+            {
+                DiceRollNode nodeNew = (DiceRollNode)windows[i];
+                DiceDialogue npcDialogue = ScriptableObjectUtility.CreateAsset<DiceDialogue>();
+                npcDialogue.roll = nodeNew.rollType;
+                npcDialogue.difficulty = nodeNew.difficulty;
+                if (lastNode != null)
+                    lastNode.next = npcDialogue;
+                i++;
+                EndNode endNode = (EndNode)windows[i];
+                BaseScriptableObject end = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
+                end.name = "End";
+                end.dialogue = endNode.finished;
+                npcDialogue.fail = end;
+                lastNode = npcDialogue;                
+            }
+
+            
+        }
+    }
+
 
     private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
     {
@@ -301,20 +381,20 @@ public class NodeEditor : EditorWindow {
         }
     }
 
-    public static void DrawNodeCurve(Rect start, Rect end)
+    public static void DrawNodeCurve(Rect start, Rect end, Color _color)
     {
-        Vector3 startPos = new Vector3(start.x +start.width/2, start.y +start.height/2,0);
+        Vector3 startPos = new Vector3(start.x +start.width, start.y +start.height/2,0);
         Vector3 endPos = new Vector3(end.x + end.width / 2, end.y + end.height / 2, 0);
 
         Vector3 startTan = startPos + Vector3.right*50;
         Vector3 endTan = endPos + Vector3.left * 50;
 
-        Color shadowCol = new Color(0, 0, 0, 0.6f);
+        
 
         for (int i = 0; i < 3; i++)
         {
-            Handles.DrawBezier(startPos, endPos, startTan, endTan, shadowCol, null, (i + 1) * 2);
+            Handles.DrawBezier(startPos, endPos, startTan, endTan, _color, null, (i + 1) * 2);
         }
-        Handles.DrawBezier(startPos, endPos, startTan, endTan, Color.black, null, 1);
+        Handles.DrawBezier(startPos, endPos, startTan, endTan, _color, null, 1);
     }
 }

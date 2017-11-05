@@ -48,7 +48,7 @@ public class OutPutNode : BaseNode {
             rect.width = 1;
             rect.height = 1;
 
-            NodeEditor.DrawNodeCurve(inputNode.windowRect, rect);
+            NodeEditor.DrawNodeCurve(inputNode.windowRect, rect, Color.black);
         }
     }
     public override void NodeDeleted(BaseNode node)

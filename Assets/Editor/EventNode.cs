@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class EventNode : BaseNode{
-    public override void DrawCurves()
-    {
-    }
+public class EventNode : BaseInputNode
+{
+    private BaseInputNode input1;
+    private Rect input1Rect;
+
 
     /* Este nodo va contener un texto explicando el resultado de una elección previa
      * además va a ser el encargado de modificar algun que otro valor en el player
@@ -14,19 +15,19 @@ public class EventNode : BaseNode{
      */
     public string text = "";
 
-    private EventReward reward;
+    public DialogueEventType.EventReward reward;
 
-    private int gold;
+    public int gold;
 
-    private int healthPoints;
+    public int healthPoints;
 
-    private string itemId;
+    public string itemId;
 
-    public enum EventReward {
+  /*  public enum EventReward {
         gold,
         item,
         life
-    }
+    }*/
     public EventNode()
     {
         windowTittle = "Event";
@@ -36,20 +37,31 @@ public class EventNode : BaseNode{
     {
         base.DrawWindow();
 
-        text = EditorGUILayout.TextField("dialogue", text);
-        reward = (EventReward)EditorGUILayout.EnumPopup("Reward Type: ", reward);
+        Event e = Event.current;
+        string inputTitle = "None";
+        if (input1)
+        {
+            inputTitle = input1.GetResult();
+        }
+        if (e.type == EventType.repaint)
+        {
+            input1Rect = GUILayoutUtility.GetLastRect();
+        }
 
-        if (reward == EventReward.gold)
+        text = EditorGUILayout.TextField("dialogue", text);
+        reward = (DialogueEventType.EventReward)EditorGUILayout.EnumPopup("Reward Type: ", reward);
+
+        if (reward == DialogueEventType.EventReward.gold)
         {
             EditorGUILayout.LabelField("Gold Amount:");
             gold = EditorGUILayout.IntField(gold);
         }
-        else if (reward == EventReward.item)
+        else if (reward == DialogueEventType.EventReward.item)
         {
             EditorGUILayout.LabelField("Item ID:");
             itemId = EditorGUILayout.TextField(itemId);
         }
-        else if (reward == EventReward.life)
+        else if (reward == DialogueEventType.EventReward.life)
         {
             EditorGUILayout.LabelField("HP Amount:");
             healthPoints = EditorGUILayout.IntField(healthPoints);
@@ -61,5 +73,49 @@ public class EventNode : BaseNode{
          * Lista de Recompensas/Castigos        LISTO
          * Input/Output                         ---
         */
+    }
+    public override void DrawCurves()
+    {
+        if (input1)
+        {
+
+            Rect rect = windowRect;
+            rect.x += input1Rect.x;
+            rect.y += input1Rect.y;
+            rect.width = 1;
+            rect.height = 1;
+
+            NodeEditor.DrawNodeCurve(input1.windowRect, rect, Color.yellow);
+        }
+    }
+    public override void SetInput(BaseInputNode input, Vector2 clickpos)
+    {
+        clickpos.x -= windowRect.x;
+        clickpos.y -= windowRect.y;
+
+        if (input1Rect.Contains(clickpos))
+            input1 = input;
+
+    }
+    public override BaseInputNode ClickedOnInput(Vector2 pos)
+    {
+        BaseInputNode retVal = null;
+
+        pos.x -= windowRect.x;
+        pos.y -= windowRect.y;
+
+        if (input1Rect.Contains(pos))
+        {
+            retVal = input1;
+            input1 = null;
+        }
+
+        return retVal;
+    }
+
+    public override void NodeDeleted(BaseNode node)
+    {
+        if (node.Equals(input1))
+            input1 = null;
     }
 }

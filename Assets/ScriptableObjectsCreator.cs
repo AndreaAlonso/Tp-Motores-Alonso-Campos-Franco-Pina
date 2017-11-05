@@ -9,9 +9,21 @@ public class ScriptableObjectsCreator : MonoBehaviour {
         ScriptableObjectUtility.CreateAsset<Dialogue>();
     }
 
-    [MenuItem("Personalizado/ScriptableObjects/Respuestas")]
+    [MenuItem("Personalizado/ScriptableObjects/Opciones")]
     public static void CreateAnswer()
     {
-        ScriptableObjectUtility.CreateAsset<Answer>();
+        ScriptableObjectUtility.CreateAsset<Choice>();
+    }
+
+    [MenuItem("Personalizado/ScriptableObjects/Evento")]
+    public static void CreateEventDialogue()
+    {
+        ScriptableObjectUtility.CreateAsset<EventDialogue>();
+    }
+
+    [MenuItem("Personalizado/ScriptableObjects/Roll")]
+    public static void CreateRoll()
+    {
+        ScriptableObjectUtility.CreateAsset<DiceDialogue>();
     }
 }

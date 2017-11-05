@@ -158,7 +158,7 @@ public class ComparisonNode : BaseInputNode
             rect.width = 1;
             rect.height = 1;
 
-            NodeEditor.DrawNodeCurve(input1.windowRect, rect);
+            NodeEditor.DrawNodeCurve(input1.windowRect, rect, Color.black);
         }
 
         if (input2)
@@ -169,7 +169,7 @@ public class ComparisonNode : BaseInputNode
             rect.width = 1;
             rect.height = 1;
 
-            NodeEditor.DrawNodeCurve(input2.windowRect, rect);
+            NodeEditor.DrawNodeCurve(input2.windowRect, rect, Color.black);
         }
     }
 }

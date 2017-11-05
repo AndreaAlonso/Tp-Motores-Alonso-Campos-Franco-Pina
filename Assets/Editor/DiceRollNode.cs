@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class DiceRollNode : BaseNode{
-    public override void DrawCurves()
-    {
-    }
+public class DiceRollNode : BaseInputNode
+{
+
+    private BaseInputNode input1;
+    private Rect input1Rect;
+
 
     //Elijo que tipo de tirada tiene que hacer el personaje
     //Fuerza/Inteligencia/Destreza/etc
@@ -18,18 +20,18 @@ public class DiceRollNode : BaseNode{
     //Opcion 2: hacer todas las tiradas en un solo nodo
     //          haciendo un hibrido entre Choices y DiceRoll
 
-    private RollType rollType;
-    private string challenge = "";
-    private int difficulty;
+    public DialogueRollType.RollType rollType;
+    public string challenge = "";
+    public int difficulty;
 
-    public enum RollType {
+   /* public enum RollType {
         Strength,
         Dexterity,
         Constitution,
         Intelligence,
         Wisdom,
         Charisma
-    }
+    }*/
 
     public DiceRollNode()
     {
@@ -40,7 +42,18 @@ public class DiceRollNode : BaseNode{
     {
         base.DrawWindow();
 
-        rollType = (RollType)EditorGUILayout.EnumPopup("Roll Stat: ", rollType);
+        Event e = Event.current;
+        string inputTitle = "None";
+        if (input1)
+        {
+            inputTitle = input1.GetResult();
+        }
+        if (e.type == EventType.repaint)
+        {
+            input1Rect = GUILayoutUtility.GetLastRect();
+        }
+
+        rollType = (DialogueRollType.RollType)EditorGUILayout.EnumPopup("Roll Stat: ", rollType);
 
         EditorGUILayout.LabelField("Select Difficulty: " + challenge);
         difficulty = EditorGUILayout.IntSlider(difficulty,0,25);
@@ -70,5 +83,51 @@ public class DiceRollNode : BaseNode{
          * selector de dificultad (valor)                       LISTO
          * calcular tirada (random 1d20 + playerStat VS DC)     ---
          */
+    }
+    public override void DrawCurves()
+    {
+        if (input1)
+        {
+
+            Rect rect = windowRect;
+            rect.x += input1Rect.x;
+            rect.y += input1Rect.y;
+            rect.width = 1;
+            rect.height = 1;
+
+            NodeEditor.DrawNodeCurve(input1.windowRect, rect, Color.magenta);
+        }
+    }
+    public override void SetInput(BaseInputNode input, Vector2 clickpos)
+    {
+        clickpos.x -= windowRect.x;
+        clickpos.y -= windowRect.y;
+
+        if (input1Rect.Contains(clickpos))
+            input1 = input;
+
+    }
+    public override BaseInputNode ClickedOnInput(Vector2 pos)
+    {
+        BaseInputNode retVal = null;
+
+        pos.x -= windowRect.x;
+        pos.y -= windowRect.y;
+
+        if (input1Rect.Contains(pos))
+        {
+            retVal = input1;
+            input1 = null;
+        }
+
+        return retVal;
+    }
+
+    public override void NodeDeleted(BaseNode node)
+    {
+        if (node.Equals(input1))
+            input1 = null;
+
+
     }
 }

@@ -29,4 +29,5 @@ public abstract class BaseNode : ScriptableObject {
     {
         return null;
     }
+    
 }

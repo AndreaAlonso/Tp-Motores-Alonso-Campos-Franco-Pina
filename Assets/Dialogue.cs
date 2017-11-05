@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Dialogue : ScriptableObject {
+public class Dialogue : BaseScriptableObject {
 
-    public string dialogueText;
-   // public bool isAnswer;
-   // public bool finishesConversation;
-    public int numerOfPosibleAnswers;
-    public Answer[] answers;
+    //public string dialogueText;
+    // public bool isAnswer;
+    // public bool finishesConversation;
+    // public int numerOfPosibleAnswers;
+    // public Answer[] answers;
+   // public BaseScriptableObject next;
 
 }
