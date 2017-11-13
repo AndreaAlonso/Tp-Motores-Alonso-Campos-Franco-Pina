@@ -59,6 +59,7 @@
      <Compile Include="Assets\Editor\NodeEditor.cs" />
      <Compile Include="Assets\Editor\OutPutNode.cs" />
      <Compile Include="Assets\Editor\StartNode.cs" />
+     <Compile Include="Assets\Editor\TutorialWindow.cs" />
  <Reference Include="UnityEditor.Advertisements">
  <HintPath>D:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/Editor/UnityEditor.Advertisements.dll</HintPath>
  </Reference>
