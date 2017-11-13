@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Linq;
 
 public class NodeEditor : EditorWindow {
 
@@ -26,6 +27,75 @@ public class NodeEditor : EditorWindow {
     
     void OnGUI()
     {
+        /*
+            StartNode startNode = new StartNode();
+            startNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
+            windows.Add(startNode);
+
+            DialogueNode dialogueNode = new DialogueNode();
+            dialogueNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
+            windows.Add(dialogueNode);
+
+            ChoiceNode choiceNode = new ChoiceNode();
+            choiceNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
+            windows.Add(choiceNode);
+
+            EventNode eventNode = new EventNode();
+            eventNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
+            windows.Add(eventNode);
+
+            DiceRollNode diceRollNode = new DiceRollNode();
+            diceRollNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
+            windows.Add(diceRollNode);
+
+            EndNode endNode = new EndNode();
+            endNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
+            windows.Add(endNode);
+        */
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Add Start"))
+        {
+            StartNode startNode = new StartNode();
+            startNode.windowRect = new Rect(50, 100, 200, 50);
+            windows.Add(startNode);
+
+            foreach (var item in windows)
+            {
+                Debug.Log(item.name);
+            }
+        }
+        if (GUILayout.Button("Add Dialogue"))
+        {
+            DialogueNode dialogueNode = new DialogueNode();
+            dialogueNode.windowRect = new Rect(200, 100, 200, 150);
+            windows.Add(dialogueNode);
+        }
+        if (GUILayout.Button("Add Choice"))
+        {
+            ChoiceNode choiceNode = new ChoiceNode();
+            choiceNode.windowRect = new Rect(400, 100, 200, 150);
+            windows.Add(choiceNode);
+        }
+        if (GUILayout.Button("Add Roll"))
+        {
+            DiceRollNode diceRollNode = new DiceRollNode();
+            diceRollNode.windowRect = new Rect(600, 100, 200, 150);
+            windows.Add(diceRollNode);
+        }
+        if (GUILayout.Button("Add Event"))
+        {
+            EventNode eventNode = new EventNode();
+            eventNode.windowRect = new Rect(800, 100, 200, 150);
+            windows.Add(eventNode);
+        }
+        if (GUILayout.Button("Add End"))
+        {
+            EndNode endNode = new EndNode();
+            endNode.windowRect = new Rect(1000, 100, 200, 50);
+            windows.Add(endNode);
+        }
+        EditorGUILayout.EndHorizontal();
+
         if (GUILayout.Button("Generate Conversation"))
         {
             SaveConversation();
@@ -57,15 +127,9 @@ public class NodeEditor : EditorWindow {
                 if (!clickedOnWindow)
                 {
                     GenericMenu menu = new GenericMenu();
-                    /*
-                    menu.AddItem(new GUIContent("Add Input Node"), false, ContextCallBack, "inputNode");
-                    menu.AddItem(new GUIContent("Add Output Node"), false, ContextCallBack, "outputNode");
-                    menu.AddItem(new GUIContent("Add Calculation Node"), false, ContextCallBack, "calcNode");
-                    menu.AddItem(new GUIContent("Add Comparison Node"), false, ContextCallBack, "compNode");
-                    */
                     menu.AddItem(new GUIContent("Add Start Node"), false, ContextCallBack, "startNode");
                     menu.AddItem(new GUIContent("Add Dialogue Node"), false, ContextCallBack, "dialogueNode");
-                   // menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
+                    menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
                     menu.AddItem(new GUIContent("Add Event Node"), false, ContextCallBack, "eventNode");
                     menu.AddItem(new GUIContent("Add DiceRoll Node"), false, ContextCallBack, "diceRollNode");
                     menu.AddItem(new GUIContent("Add End Node"), false, ContextCallBack, "endNode");
@@ -300,36 +364,6 @@ public class NodeEditor : EditorWindow {
             endNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
             windows.Add(endNode);
         }
-        /*
-        if (clb.Equals("inputNode"))
-        {
-            InputNode inputNode = new InputNode();
-            inputNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
-
-            windows.Add(inputNode);
-        }
-        else if (clb.Equals("outputNode"))
-        {
-            OutPutNode outputNode = new OutPutNode();
-            outputNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 100);
-
-            windows.Add(outputNode);
-        }
-        else if (clb.Equals("calcNode"))
-        {
-            CalcNode calcNode = new CalcNode();
-            calcNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 100);
-
-            windows.Add(calcNode);
-        }
-        else if (clb.Equals("compNode"))
-        {
-            ComparisonNode compNode = new ComparisonNode();
-            compNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 100);
-
-            windows.Add(compNode);
-        }
-        */
         else if (clb.Equals("makeTransition"))
         {
             bool clickedOnWindow = false;
