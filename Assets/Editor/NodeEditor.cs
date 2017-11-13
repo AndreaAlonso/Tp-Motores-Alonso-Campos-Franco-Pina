@@ -11,13 +11,14 @@ public class NodeEditor : EditorWindow {
     private Vector2 mousePos;
 
     private BaseNode selectedNode;
+    private StartNode startNode;
 
     private bool makeTransitionMode = false;
 
     private Vector2 offset;
     private Vector2 drag;
 
-    
+    private bool _startEnd;
 
     [MenuItem("Personalizado/Node Editor")]
     static void ShowEditor()
@@ -27,192 +28,14 @@ public class NodeEditor : EditorWindow {
     
     void OnGUI()
     {
-        /*
-            StartNode startNode = new StartNode();
-            startNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
-            windows.Add(startNode);
-
-            DialogueNode dialogueNode = new DialogueNode();
-            dialogueNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
-            windows.Add(dialogueNode);
-
-            ChoiceNode choiceNode = new ChoiceNode();
-            choiceNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
-            windows.Add(choiceNode);
-
-            EventNode eventNode = new EventNode();
-            eventNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
-            windows.Add(eventNode);
-
-            DiceRollNode diceRollNode = new DiceRollNode();
-            diceRollNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
-            windows.Add(diceRollNode);
-
-            EndNode endNode = new EndNode();
-            endNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
-            windows.Add(endNode);
-        */
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Add Start"))
-        {
-            StartNode startNode = new StartNode();
-            startNode.windowRect = new Rect(50, 100, 200, 50);
-            windows.Add(startNode);
-
-            foreach (var item in windows)
-            {
-                Debug.Log(item.name);
-            }
-        }
-        if (GUILayout.Button("Add Dialogue"))
-        {
-            DialogueNode dialogueNode = new DialogueNode();
-            dialogueNode.windowRect = new Rect(200, 100, 200, 150);
-            windows.Add(dialogueNode);
-        }
-        if (GUILayout.Button("Add Choice"))
-        {
-            ChoiceNode choiceNode = new ChoiceNode();
-            choiceNode.windowRect = new Rect(400, 100, 200, 150);
-            windows.Add(choiceNode);
-        }
-        if (GUILayout.Button("Add Roll"))
-        {
-            DiceRollNode diceRollNode = new DiceRollNode();
-            diceRollNode.windowRect = new Rect(600, 100, 200, 150);
-            windows.Add(diceRollNode);
-        }
-        if (GUILayout.Button("Add Event"))
-        {
-            EventNode eventNode = new EventNode();
-            eventNode.windowRect = new Rect(800, 100, 200, 150);
-            windows.Add(eventNode);
-        }
-        if (GUILayout.Button("Add End"))
-        {
-            EndNode endNode = new EndNode();
-            endNode.windowRect = new Rect(1000, 100, 200, 50);
-            windows.Add(endNode);
-        }
-        EditorGUILayout.EndHorizontal();
-
-        if (GUILayout.Button("Generate Conversation"))
-        {
-            SaveConversation();
-        }
-        Event e = Event.current;
-
+        DrawButtons();
         DrawGrid(20, 0.2f, Color.black);
         DrawGrid(100, 0.6f, Color.black);
 
-        mousePos = e.mousePosition;
-        if (e.button == 1 && !makeTransitionMode)
-        {
-            if (e.type == EventType.MouseDown)
-            {
-                bool clickedOnWindow = false;
-                int selectIndex = -1;
+        NodeStartEnd();
 
-                for (int i = 0; i < windows.Count; i++)
-                {
+        MouseActions();
 
-                    if (windows[i].windowRect.Contains(mousePos))
-                    {
-                        selectIndex = i;
-                        clickedOnWindow = true;
-                        break;
-                    }
-
-                }
-                if (!clickedOnWindow)
-                {
-                    GenericMenu menu = new GenericMenu();
-                    menu.AddItem(new GUIContent("Add Start Node"), false, ContextCallBack, "startNode");
-                    menu.AddItem(new GUIContent("Add Dialogue Node"), false, ContextCallBack, "dialogueNode");
-                    menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
-                    menu.AddItem(new GUIContent("Add Event Node"), false, ContextCallBack, "eventNode");
-                    menu.AddItem(new GUIContent("Add DiceRoll Node"), false, ContextCallBack, "diceRollNode");
-                    menu.AddItem(new GUIContent("Add End Node"), false, ContextCallBack, "endNode");
-
-                    menu.ShowAsContext();
-                    e.Use();
-                }
-                else
-                {
-                    GenericMenu menu = new GenericMenu();
-                    menu.AddItem(new GUIContent("Make Transition"), false, ContextCallBack, "makeTransition");
-                    menu.AddSeparator("");
-                    menu.AddItem(new GUIContent("Delete Node"), false, ContextCallBack, "deleteNode");
-
-                    menu.ShowAsContext();
-                    e.Use();
-                }
-            }
-        }
-        else if (e.button == 0 && e.type == EventType.MouseDown && makeTransitionMode)
-        {
-            bool clickedOnWindow = false;
-            int selectIndex = -1;
-
-            for (int i = 0; i < windows.Count; i++)
-            {
-
-                if (windows[i].windowRect.Contains(mousePos))
-                {
-                    selectIndex = i;
-                    clickedOnWindow = true;
-                    break;
-                }
-
-            }
-            if (clickedOnWindow && !windows[selectIndex].Equals(selectedNode))
-            {
-                windows[selectIndex].SetInput((BaseInputNode)selectedNode, mousePos);
-                makeTransitionMode = false;
-                selectedNode = null;
-            }
-            if (!clickedOnWindow)
-            {
-                makeTransitionMode = false;
-                selectedNode = null;
-            }
-
-            e.Use();
-        }
-        else if (e.button == 0 && e.type == EventType.MouseDown && !makeTransitionMode )
-        {
-            bool clickedOnWindow = false;
-            int selectIndex = -1;
-
-            for (int i = 0; i < windows.Count; i++)
-            {
-
-                if (windows[i].windowRect.Contains(mousePos))
-                {
-                    selectIndex = i;
-                    clickedOnWindow = true;
-                    break;
-                }
-
-            }
-            if (clickedOnWindow)
-            {
-                BaseInputNode nodeToChange = windows[selectIndex].ClickedOnInput(mousePos);
-
-                if (nodeToChange != null)
-                {
-                    selectedNode = nodeToChange;
-                    makeTransitionMode = true;
-                }
-            }
-        }
-        if (makeTransitionMode && selectedNode != null)
-        {
-            Rect mouseRect = new Rect(e.mousePosition.x, e.mousePosition.y, 10, 10);
-
-            DrawNodeCurve(selectedNode.windowRect, mouseRect, Color.black);
-            Repaint();
-        }
         foreach (BaseNode n in windows)
         {
             n.DrawCurves();
@@ -300,7 +123,66 @@ public class NodeEditor : EditorWindow {
         }
     }
 
+    //Dibuja los botones propios de la ventana del editor
+    private void DrawButtons() {
+        EditorGUILayout.BeginHorizontal();
 
+        if (GUILayout.Button("Add Start"))
+        {
+            foreach (var item in windows)
+            {
+                //TIRA ERROR
+                //if (item.GetType().Equals(typeof(StartNode))) {
+                //    return;
+                //}
+                if (item.windowTittle == "Start")
+                {
+                    return;
+                }
+                StartNode startNode = new StartNode();
+                startNode.windowRect = new Rect(50, 100, 200, 50);
+                windows.Add(startNode);
+            }
+        }
+        if (GUILayout.Button("Add Dialogue"))
+        {
+            DialogueNode dialogueNode = new DialogueNode();
+            dialogueNode.windowRect = new Rect(200, 100, 200, 150);
+            windows.Add(dialogueNode);
+        }
+        if (GUILayout.Button("Add Choice"))
+        {
+            ChoiceNode choiceNode = new ChoiceNode();
+            choiceNode.windowRect = new Rect(400, 100, 200, 150);
+            windows.Add(choiceNode);
+        }
+        if (GUILayout.Button("Add Roll"))
+        {
+            DiceRollNode diceRollNode = new DiceRollNode();
+            diceRollNode.windowRect = new Rect(600, 100, 200, 150);
+            windows.Add(diceRollNode);
+        }
+        if (GUILayout.Button("Add Event"))
+        {
+            EventNode eventNode = new EventNode();
+            eventNode.windowRect = new Rect(800, 100, 200, 150);
+            windows.Add(eventNode);
+        }
+        if (GUILayout.Button("Add End"))
+        {
+            EndNode endNode = new EndNode();
+            endNode.windowRect = new Rect(1000, 100, 200, 50);
+            windows.Add(endNode);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        if (GUILayout.Button("Generate Conversation"))
+        {
+            SaveConversation();
+        }
+    }
+
+    //Dibuja la grilla de fondo
     private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
     {
         int widthDivs = Mathf.CeilToInt(position.width / gridSpacing);
@@ -325,19 +207,153 @@ public class NodeEditor : EditorWindow {
         Handles.color = Color.white;
         Handles.EndGUI();
     }
+
+    //Chequea los clics del mouse
+    void MouseActions()
+    {
+        Event e = Event.current;
+        mousePos = e.mousePosition;
+        if (e.button == 1 && !makeTransitionMode)
+        {
+            if (e.type == EventType.MouseDown)
+            {
+                bool clickedOnWindow = false;
+                int selectIndex = -1;
+
+                for (int i = 0; i < windows.Count; i++)
+                {
+
+                    if (windows[i].windowRect.Contains(mousePos))
+                    {
+                        selectIndex = i;
+                        clickedOnWindow = true;
+                        break;
+                    }
+
+                }
+                if (!clickedOnWindow)
+                {
+                    ContextMenu();
+                    e.Use();
+                }
+                else
+                {
+                    GenericMenu menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Make Transition"), false, ContextCallBack, "makeTransition");
+                    menu.AddSeparator("");
+                    menu.AddItem(new GUIContent("Delete Node"), false, ContextCallBack, "deleteNode");
+
+                    menu.ShowAsContext();
+                    e.Use();
+                }
+            }
+        }
+        else if (e.button == 0 && e.type == EventType.MouseDown && makeTransitionMode)
+        {
+            bool clickedOnWindow = false;
+            int selectIndex = -1;
+
+            for (int i = 0; i < windows.Count; i++)
+            {
+
+                if (windows[i].windowRect.Contains(mousePos))
+                {
+                    selectIndex = i;
+                    clickedOnWindow = true;
+                    break;
+                }
+
+            }
+            if (clickedOnWindow && !windows[selectIndex].Equals(selectedNode))
+            {
+                windows[selectIndex].SetInput((BaseInputNode)selectedNode, mousePos);
+                makeTransitionMode = false;
+                selectedNode = null;
+            }
+            if (!clickedOnWindow)
+            {
+                makeTransitionMode = false;
+                selectedNode = null;
+            }
+
+            e.Use();
+        }
+        else if (e.button == 0 && e.type == EventType.MouseDown && !makeTransitionMode)
+        {
+            bool clickedOnWindow = false;
+            int selectIndex = -1;
+
+            for (int i = 0; i < windows.Count; i++)
+            {
+
+                if (windows[i].windowRect.Contains(mousePos))
+                {
+                    selectIndex = i;
+                    clickedOnWindow = true;
+                    break;
+                }
+
+            }
+            if (clickedOnWindow)
+            {
+                BaseInputNode nodeToChange = windows[selectIndex].ClickedOnInput(mousePos);
+
+                if (nodeToChange != null)
+                {
+                    selectedNode = nodeToChange;
+                    makeTransitionMode = true;
+                }
+            }
+        }
+        if (makeTransitionMode && selectedNode != null)
+        {
+            Rect mouseRect = new Rect(e.mousePosition.x, e.mousePosition.y, 10, 10);
+
+            DrawNodeCurve(selectedNode.windowRect, mouseRect, Color.black);
+            Repaint();
+        }
+    }
+
+    //
     void DrawNodeWindow(int id)
     {
         windows[id].DrawWindow();
         GUI.DragWindow();
     }
 
+    //Menu contextual con las opciones (al hacer clic derecho)
+    void ContextMenu()
+    {
+        GenericMenu menu = new GenericMenu();
+        menu.AddItem(new GUIContent("Add Start Node"), false, ContextCallBack, "startNode");
+        menu.AddItem(new GUIContent("Add Dialogue Node"), false, ContextCallBack, "dialogueNode");
+        menu.AddItem(new GUIContent("Add Choice Node"), false, ContextCallBack, "choiceNode");
+        menu.AddItem(new GUIContent("Add Event Node"), false, ContextCallBack, "eventNode");
+        menu.AddItem(new GUIContent("Add DiceRoll Node"), false, ContextCallBack, "diceRollNode");
+        menu.AddItem(new GUIContent("Add End Node"), false, ContextCallBack, "endNode");
+
+        menu.ShowAsContext();
+    }
+
+    //Contiene las funciones para las opciones del menu contextual
     void ContextCallBack(object obj)
     {
         string clb = obj.ToString();
         if (clb.Equals("startNode")) {
+            foreach (var item in windows)
+            {
+                //TIRA ERROR
+                //if (item.GetType().Equals(typeof(StartNode))) {
+                //    return;
+                //}
+                if (item.windowTittle == "Start")
+                {
+                    return;
+                }
             StartNode startNode = new StartNode();
             startNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
             windows.Add(startNode);
+            }
         }
         if (clb.Equals("dialogueNode")){
             DialogueNode dialogueNode = new DialogueNode();
@@ -415,6 +431,25 @@ public class NodeEditor : EditorWindow {
         }
     }
 
+    //Dibuja los nodos Start y End al abrir el editor
+    public void NodeStartEnd()
+    {
+        if (!_startEnd)
+        {
+            //windows.Clear();
+            StartNode startNode = new StartNode();
+            startNode.windowRect = new Rect(0, 50, 200, 50);
+            windows.Add(startNode);
+
+            EndNode endNode = new EndNode();
+            endNode.windowRect = new Rect(0, 150, 200, 50);
+            windows.Add(endNode);
+
+            _startEnd = true;
+        }
+    }
+
+    //Dibuja las conexiones entre nodos
     public static void DrawNodeCurve(Rect start, Rect end, Color _color)
     {
         Vector3 startPos = new Vector3(start.x +start.width, start.y +start.height/2,0);
