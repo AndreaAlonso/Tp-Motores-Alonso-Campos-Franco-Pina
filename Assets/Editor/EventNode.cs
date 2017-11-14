@@ -5,8 +5,8 @@ using UnityEditor;
 
 public class EventNode : BaseInputNode
 {
-    private BaseInputNode input1;
-    private Rect input1Rect;
+    public BaseInputNode input1;
+    public Rect input1Rect;
 
 
     /* Este nodo va contener un texto explicando el resultado de una elección previa

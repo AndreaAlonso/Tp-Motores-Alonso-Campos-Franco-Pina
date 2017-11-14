@@ -6,8 +6,8 @@ using UnityEditor;
 public class DialogueNode : BaseInputNode
 {
 
-    private BaseInputNode input1;
-    private Rect input1Rect;
+    public BaseInputNode input1;
+    public Rect input1Rect;
 
 
     /* Este es el nodo comun, solo lleva texto y boton de "continue"

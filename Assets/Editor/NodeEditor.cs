@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using System.Linq;
 
-public class NodeEditor : EditorWindow {
+public class NodeEditor : EditorWindow
+{
 
     private List<BaseNode> windows = new List<BaseNode>();
 
@@ -20,12 +21,15 @@ public class NodeEditor : EditorWindow {
 
     private bool _startEnd;
 
+    //[SerializeField]
+    public List<BaseScriptableObject> ScriptToDelete = new List<BaseScriptableObject>();
+
     [MenuItem("Personalizado/Node Editor")]
     static void ShowEditor()
     {
         NodeEditor editor = EditorWindow.GetWindow<NodeEditor>();
     }
-    
+
     void OnGUI()
     {
         DrawButtons();
@@ -48,6 +52,8 @@ public class NodeEditor : EditorWindow {
             windows[i].windowRect = GUI.Window(i, windows[i].windowRect, DrawNodeWindow, windows[i].windowTittle);
         }
         EndWindows();
+
+        DropAreaGUI();
     }
 
 
@@ -61,19 +67,24 @@ public class NodeEditor : EditorWindow {
             if (windows[i] is StartNode)
             {
                 StartNode nodeNew = (StartNode)windows[i];
-                BaseScriptableObject start = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
-                start.name = "Start";
+                Dialogue start = ScriptableObjectUtility.CreateAsset<Dialogue>();
+                //start.name = "Start";
+                start.start = true;
+                start.windowPos = nodeNew.windowRect;
                 lastNode = start;
+                ScriptToDelete.Add((BaseScriptableObject)start);
 
             }
             if (windows[i] is DialogueNode)
             {
                 DialogueNode nodeNew = (DialogueNode)windows[i];
-                BaseScriptableObject npcDialogue = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
+                Dialogue npcDialogue = ScriptableObjectUtility.CreateAsset<Dialogue>();
                 npcDialogue.dialogue = nodeNew.text;
+                npcDialogue.windowPos = nodeNew.windowRect;
                 if (lastNode != null)
                     lastNode.next = npcDialogue;
                 lastNode = npcDialogue;
+                ScriptToDelete.Add((BaseScriptableObject)npcDialogue);
 
             }
             if (windows[i] is EventNode)
@@ -88,19 +99,25 @@ public class NodeEditor : EditorWindow {
                     npcDialogue.goldOrHp = nodeNew.gold;
                 else npcDialogue.item = nodeNew.itemId;
 
+                npcDialogue.windowPos = nodeNew.windowRect;
+
                 if (lastNode != null)
                     lastNode.next = npcDialogue;
                 lastNode = npcDialogue;
+
+                ScriptToDelete.Add((BaseScriptableObject)npcDialogue);
 
             }
             if (windows[i] is EndNode)
             {
                 EndNode endNode = (EndNode)windows[i];
                 BaseScriptableObject end = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
-                end.name = "End";
+                //end.name = "End";
                 end.dialogue = "Finished";
+                end.windowPos = endNode.windowRect;
                 lastNode.next = end;
                 //lastNode = end;
+                ScriptToDelete.Add((BaseScriptableObject)end);
             }
             if (windows[i] is DiceRollNode)
             {
@@ -108,23 +125,140 @@ public class NodeEditor : EditorWindow {
                 DiceDialogue npcDialogue = ScriptableObjectUtility.CreateAsset<DiceDialogue>();
                 npcDialogue.roll = nodeNew.rollType;
                 npcDialogue.difficulty = nodeNew.difficulty;
+                npcDialogue.windowPos = nodeNew.windowRect;
+                ScriptToDelete.Add((BaseScriptableObject)npcDialogue);
                 if (lastNode != null)
                     lastNode.next = npcDialogue;
                 i++;
                 EndNode endNode = (EndNode)windows[i];
                 BaseScriptableObject end = ScriptableObjectUtility.CreateAsset<BaseScriptableObject>();
-                end.name = "End";
+                //end.name = "End";
                 end.dialogue = endNode.finished;
+                end.windowPos = endNode.windowRect;
                 npcDialogue.fail = end;
-                lastNode = npcDialogue;                
+                lastNode = npcDialogue;
+                ScriptToDelete.Add((BaseScriptableObject)end);
             }
-
-            
         }
     }
 
+    public void ReloadConversation(Object dragged)
+    {
+      /*  BaseNode selNode = windows[0];
+        windows.RemoveAt(0);
+
+        foreach (BaseNode n in windows)
+        {
+            n.NodeDeleted(selNode);
+        }*/
+
+        BaseScriptableObject dialogue = (BaseScriptableObject)dragged;
+        BaseInputNode lastDiag;
+
+        Dialogue start = (Dialogue)dialogue;
+        StartNode startNode = (StartNode)windows[0];
+        startNode.windowRect = start.windowPos;
+        lastDiag = startNode;
+        BaseScriptableObject lastDiagScriptObj=start;
+
+
+        while (dialogue.next != null)
+        {
+            ScriptToDelete.Add(dialogue);
+
+            if (dialogue is Dialogue)
+            {
+                Dialogue npcDialogue = (Dialogue)dialogue;
+
+                if (!npcDialogue.start)
+                {
+                    DialogueNode newNode = new DialogueNode();
+                    newNode.windowRect = npcDialogue.windowPos;
+                    newNode.text = npcDialogue.dialogue;
+                    newNode.hasInput = true;
+                    newNode.input1 = lastDiag;
+                    newNode.input1Rect = lastDiag.windowRect;
+                    lastDiag = newNode;
+                    windows.Add(newNode);
+                }
+            
+               // dialogue = dialogue.next;
+            }
+            else if (dialogue is EventDialogue)
+            {
+                EventDialogue npcDialogue = (EventDialogue)dialogue;
+                EventNode newNode = new EventNode();
+                newNode.windowRect = npcDialogue.windowPos;
+                newNode.text = npcDialogue.dialogue;
+                newNode.reward = npcDialogue.rewardToRecieve;
+                if (newNode.reward == DialogueEventType.EventReward.gold)
+                    newNode.gold = npcDialogue.goldOrHp;
+                else if (newNode.reward == DialogueEventType.EventReward.life)
+                    newNode.healthPoints = npcDialogue.goldOrHp;
+                else
+                    newNode.itemId = npcDialogue.item;
+                
+                newNode.hasInput = true;
+                newNode.input1 = lastDiag;
+                newNode.input1Rect = lastDiag.windowRect;
+                lastDiag = newNode;
+                windows.Add(newNode);
+            }
+            else if(dialogue is DiceDialogue)
+            {
+                DiceDialogue diceRoll = (DiceDialogue)dialogue;
+                DiceRollNode newNode = new DiceRollNode();
+                newNode.windowRect = diceRoll.windowPos;
+                newNode.rollType = diceRoll.roll;
+                newNode.difficulty = diceRoll.difficulty;
+                newNode.hasInput = true;
+                newNode.input1 = lastDiag;
+                newNode.input1Rect = lastDiag.windowRect;
+                //BaseScriptableObject endObj = diceRoll.fail;
+                EndNode newEnd = new EndNode();
+                newEnd.windowRect = diceRoll.fail.windowPos;
+                newEnd.finished = diceRoll.fail.dialogue;
+                newEnd.hasInput = true;
+                newEnd.inputNode = newNode;
+                newEnd.inputNodeRect = newNode.windowRect;
+                ScriptToDelete.Add(diceRoll.fail);
+                lastDiag = newNode;
+                windows.Add(newNode);
+                windows.Add(newEnd);
+            }
+            
+            lastDiagScriptObj = dialogue;
+            Debug.Log("asdasd");
+            dialogue = dialogue.next;
+        }
+        EndNode lastEnd = new EndNode();
+        lastEnd.windowRect = lastDiagScriptObj.next.windowPos;
+        lastEnd.finished = lastDiagScriptObj.next.dialogue;
+        lastEnd.hasInput = true;
+        lastEnd.inputNode = lastDiag;
+        lastEnd.inputNodeRect = lastDiag.windowRect;
+        ScriptToDelete.Add(lastDiagScriptObj.next);
+        windows.Add(lastEnd);
+        Debug.Log("ultimo alcanzado");
+        Repaint();
+    }
+
+    void EraseScriptObj()
+    {
+        foreach (var _target in ScriptToDelete)
+        {
+            Debug.Log(_target.name);
+            //DestroyImmediate(_target, true);
+            AssetDatabase.DeleteAsset("Assets/NewObjects/" + _target.name + ".asset");
+            AssetDatabase.DeleteAsset("Assets/NewObjects/" + _target.ToString() + ".asset");
+        }
+        ScriptToDelete.Clear();
+       
+    }
+
     //Dibuja los botones propios de la ventana del editor
-    private void DrawButtons() {
+    private void DrawButtons()
+    {
         EditorGUILayout.BeginHorizontal();
 
         if (GUILayout.Button("Add Start"))
@@ -178,9 +312,13 @@ public class NodeEditor : EditorWindow {
 
         if (GUILayout.Button("Generate Conversation"))
         {
+            if (ScriptToDelete.Count > 0)
+                EraseScriptObj();
             SaveConversation();
         }
     }
+
+    
 
     //Dibuja la grilla de fondo
     private void DrawGrid(float gridSpacing, float gridOpacity, Color gridColor)
@@ -340,7 +478,8 @@ public class NodeEditor : EditorWindow {
     void ContextCallBack(object obj)
     {
         string clb = obj.ToString();
-        if (clb.Equals("startNode")) {
+        if (clb.Equals("startNode"))
+        {
             foreach (var item in windows)
             {
                 //TIRA ERROR
@@ -351,32 +490,37 @@ public class NodeEditor : EditorWindow {
                 {
                     return;
                 }
-            StartNode startNode = new StartNode();
-            startNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
-            windows.Add(startNode);
+                StartNode startNode = new StartNode();
+                startNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
+                windows.Add(startNode);
             }
         }
-        if (clb.Equals("dialogueNode")){
+        if (clb.Equals("dialogueNode"))
+        {
             DialogueNode dialogueNode = new DialogueNode();
             dialogueNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
             windows.Add(dialogueNode);
         }
-        if (clb.Equals("choiceNode")){
+        if (clb.Equals("choiceNode"))
+        {
             ChoiceNode choiceNode = new ChoiceNode();
             choiceNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
             windows.Add(choiceNode);
         }
-        if (clb.Equals("eventNode")){
+        if (clb.Equals("eventNode"))
+        {
             EventNode eventNode = new EventNode();
             eventNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
             windows.Add(eventNode);
         }
-        if (clb.Equals("diceRollNode")){
+        if (clb.Equals("diceRollNode"))
+        {
             DiceRollNode diceRollNode = new DiceRollNode();
             diceRollNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 150);
             windows.Add(diceRollNode);
         }
-        if (clb.Equals("endNode")){
+        if (clb.Equals("endNode"))
+        {
             EndNode endNode = new EndNode();
             endNode.windowRect = new Rect(mousePos.x, mousePos.y, 200, 50);
             windows.Add(endNode);
@@ -442,9 +586,9 @@ public class NodeEditor : EditorWindow {
             startNode.windowRect = new Rect(0, 50, 200, 50);
             windows.Add(startNode);
 
-            EndNode endNode = new EndNode();
+           /* EndNode endNode = new EndNode();
             endNode.windowRect = new Rect(0, 150, 200, 50);
-            windows.Add(endNode);
+            windows.Add(endNode);*/
 
             _startEnd = true;
         }
@@ -453,13 +597,13 @@ public class NodeEditor : EditorWindow {
     //Dibuja las conexiones entre nodos
     public static void DrawNodeCurve(Rect start, Rect end, Color _color)
     {
-        Vector3 startPos = new Vector3(start.x +start.width, start.y +start.height/2,0);
+        Vector3 startPos = new Vector3(start.x + start.width, start.y + start.height / 2, 0);
         Vector3 endPos = new Vector3(end.x + end.width / 2, end.y + end.height / 2, 0);
 
-        Vector3 startTan = startPos + Vector3.right*50;
+        Vector3 startTan = startPos + Vector3.right * 50;
         Vector3 endTan = endPos + Vector3.left * 50;
 
-        
+
 
         for (int i = 0; i < 3; i++)
         {
@@ -467,4 +611,41 @@ public class NodeEditor : EditorWindow {
         }
         Handles.DrawBezier(startPos, endPos, startTan, endTan, _color, null, 1);
     }
+
+    public void DropAreaGUI()
+    {
+        Event evt = Event.current;
+        Rect drop_area = GUILayoutUtility.GetRect(0.0f, 0.0f, GUILayout.ExpandWidth(true),GUILayout.ExpandHeight(true));
+       // GUI.Box(drop_area, "Add Trigger");
+
+        switch (evt.type)
+        {
+            case EventType.DragUpdated:
+            case EventType.DragPerform:
+                if (!drop_area.Contains(evt.mousePosition))
+                    return;
+
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (evt.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+
+                    foreach (Object dragged_object in DragAndDrop.objectReferences)
+                    {
+                        if(dragged_object is Dialogue)
+                        {
+                            Dialogue newDiag = (Dialogue)dragged_object;
+                            if (newDiag.start)
+                                ReloadConversation(dragged_object);
+                        }
+                            
+                    }
+                }
+                break;
+        }
+    }
+
+
+    
 }

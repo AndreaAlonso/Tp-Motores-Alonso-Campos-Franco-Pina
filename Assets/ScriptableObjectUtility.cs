@@ -9,6 +9,9 @@ public class ScriptableObjectUtility : MonoBehaviour {
     {
         T asset = ScriptableObject.CreateInstance<T>();
 
+        if (!AssetDatabase.IsValidFolder(("Assets/NewObjects")))
+            AssetDatabase.CreateFolder("Assets", "NewObjects");
+
         string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/NewObjects/" + typeof(T).ToString() + ".asset");
 
         AssetDatabase.CreateAsset(asset, assetPathAndName);

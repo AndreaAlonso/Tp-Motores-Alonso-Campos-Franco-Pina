@@ -6,5 +6,6 @@ public class BaseScriptableObject : ScriptableObject {
 
     public string dialogue;
     public BaseScriptableObject next;
+    public Rect windowPos;
 
 }

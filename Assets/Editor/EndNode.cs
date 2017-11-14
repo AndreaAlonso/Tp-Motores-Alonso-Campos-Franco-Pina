@@ -5,8 +5,8 @@ using UnityEditor;
 
 public class EndNode : BaseNode{
 
-    private BaseInputNode inputNode;
-    private Rect inputNodeRect;
+    public BaseInputNode inputNode;
+    public Rect inputNodeRect;
 
    
     /*Este nodo solo se encarga de finalizar el dialogo

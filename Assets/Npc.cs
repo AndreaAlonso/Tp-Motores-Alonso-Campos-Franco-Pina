@@ -82,9 +82,13 @@ public class Npc : MonoBehaviour {
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            current = current.next;
-            ShowDialogue();
-            PrivateAction();
+            if (current.next != null)
+            {
+                current = current.next;
+                ShowDialogue();
+                PrivateAction();
+
+            }
         }
     }
     public void ShowDialogue()

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Dialogue : BaseScriptableObject {
 
+    public bool start;
     //public string dialogueText;
     // public bool isAnswer;
     // public bool finishesConversation;

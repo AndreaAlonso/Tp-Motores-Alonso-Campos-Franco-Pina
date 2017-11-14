@@ -6,8 +6,8 @@ using UnityEditor;
 public class DiceRollNode : BaseInputNode
 {
 
-    private BaseInputNode input1;
-    private Rect input1Rect;
+    public BaseInputNode input1;
+    public Rect input1Rect;
 
 
     //Elijo que tipo de tirada tiene que hacer el personaje
