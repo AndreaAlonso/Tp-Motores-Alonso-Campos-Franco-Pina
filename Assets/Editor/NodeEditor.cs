@@ -241,7 +241,8 @@ public class NodeEditor : EditorWindow {
                     GenericMenu menu = new GenericMenu();
                     menu.AddItem(new GUIContent("Make Transition"), false, ContextCallBack, "makeTransition");
                     menu.AddSeparator("");
-                    menu.AddItem(new GUIContent("Delete Node"), false, ContextCallBack, "deleteNode");
+                    if (!windows[0].windowRect.Contains(mousePos))
+                        menu.AddItem(new GUIContent("Delete Node"), false, ContextCallBack, "deleteNode");
 
                     menu.ShowAsContext();
                     e.Use();
